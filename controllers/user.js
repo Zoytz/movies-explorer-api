@@ -19,7 +19,7 @@ exports.getCurrentUser = (req, res, next) => {
 
 exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, email, password,
   } = req.body;
   User.findOne({ email })
     .then((user) => {
@@ -27,14 +27,12 @@ exports.createUser = (req, res, next) => {
         bcrypt.hash(password, 10)
           .then((hash) => User.create({
             name,
-            about,
-            avatar,
             email,
             password: hash,
           }))
           .then(() => res.status(201).send({
             data: {
-              name, about, avatar, email,
+              name, email,
             },
           }))
           .catch((err) => {
