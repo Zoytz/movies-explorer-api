@@ -7,33 +7,6 @@ const Error409 = require('../utils/errors/Error409');
 const Error400 = require('../utils/errors/Error400');
 const Error401 = require('../utils/errors/Error401');
 
-exports.getUsers = async (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      res.status(200).send(users);
-    })
-    .catch(() => {
-      next(new Error500('Ошибка сервера'));
-    });
-};
-
-exports.getUserById = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      next(new Error404('Пользователь не найден'));
-    } else {
-      res.status(200).send(user);
-    }
-  } catch (err) {
-    if (err.name === 'CastError') {
-      next(new Error404('Пользователь не найден'));
-    } else {
-      next(new Error500('Ошибка сервера'));
-    }
-  }
-};
-
 exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
@@ -82,10 +55,10 @@ exports.createUser = (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    const { name, about } = req.body;
+    const { name } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name, about },
+      { name },
       { new: true, runValidators: true },
     );
     if (!updatedUser) {
@@ -96,31 +69,6 @@ exports.updateUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new Error400('Переданы некорректные данные при обновлении профиля'));
-    } else {
-      next(new Error500('Ошибка сервера'));
-    }
-  }
-};
-
-exports.updateUserAvatar = async (req, res, next) => {
-  try {
-    const { avatar } = req.body;
-    if (!avatar) {
-      next(new Error400('Переданы некорректные данные при обновлении аватара'));
-    }
-    const userWithUpdatedAvatar = await User.findByIdAndUpdate(
-      req.user._id,
-      { avatar },
-      { new: true, runValidators: true },
-    );
-    if (!userWithUpdatedAvatar) {
-      next(new Error404('Пользователь с указанным _id не найден'));
-    } else {
-      res.status(200).send(userWithUpdatedAvatar);
-    }
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      next(new Error400('Переданы некорректные данные при обновлении аватара'));
     } else {
       next(new Error500('Ошибка сервера'));
     }
