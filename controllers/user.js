@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Error404 = require('../utils/errors/Error404');
 const Error500 = require('../utils/errors/Error500');
 const Error409 = require('../utils/errors/Error409');
-const Error400 = require('../utils/errors/Error400');
+// const Error400 = require('../utils/errors/Error400');
 const Error401 = require('../utils/errors/Error401');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -55,10 +55,10 @@ exports.createUser = (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    const { name } = req.body;
+    const { name, email } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name },
+      { name, email },
       { new: true, runValidators: true },
     );
     if (!updatedUser) {
@@ -68,7 +68,7 @@ exports.updateUser = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new Error400('Переданы некорректные данные при обновлении профиля'));
+      next(new Error409('Переданы некорректные данные при обновлении профиля'));
     } else {
       next(new Error500('Ошибка сервера'));
     }

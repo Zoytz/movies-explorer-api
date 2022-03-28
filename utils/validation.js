@@ -1,4 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
+const Error400 = require('./errors/Error400');
+
+const validationURL = (URL) => {
+  if (!validator.isURL(URL)) {
+    throw new Error400('Некорректный url');
+  }
+  return URL;
+};
 
 const validateUserId = celebrate({
   params: Joi.object().keys({
@@ -10,29 +19,30 @@ const validateUser = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
   }),
 });
 
 const validateMovie = celebrate({
   body: Joi.object().keys({
-    nameRu: Joi.string().required(),
-    nameEn: Joi.string().required(),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
     country: Joi.string().required(),
     director: Joi.string().required(),
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().pattern(/[-a-zA-Z0-9@:%_.~#?&=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_.~#?&=]*)?/),
-    trailerLink: Joi.string().required().pattern(/[-a-zA-Z0-9@:%_.~#?&=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_.~#?&=]*)?/),
-    thumbnail: Joi.string().required().pattern(/[-a-zA-Z0-9@:%_.~#?&=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_.~#?&=]*)?/),
-    movieId: Joi.string().required(),
+    image: Joi.string().required().custom(validationURL),
+    trailerLink: Joi.string().required().custom(validationURL),
+    thumbnail: Joi.string().required().custom(validationURL),
+    movieId: Joi.number().required(),
   }),
 });
 
 const validateProfile = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    email: Joi.string().required().email(),
   }),
 });
 
