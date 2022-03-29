@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Error404 = require('../utils/errors/Error404');
 const Error500 = require('../utils/errors/Error500');
 const Error409 = require('../utils/errors/Error409');
-// const Error400 = require('../utils/errors/Error400');
+const Error400 = require('../utils/errors/Error400');
 const Error401 = require('../utils/errors/Error401');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -56,19 +56,24 @@ exports.createUser = (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   try {
     const { name, email } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { name, email },
-      { new: true, runValidators: true },
-    );
-    if (!updatedUser) {
-      next(new Error404('Пользователь с указанным _id не найден'));
+    const createdUser = await User.findOne({ email });
+    if (createdUser) {
+      next(new Error409('такой email уже зарегестрирован'));
     } else {
-      res.status(200).send(updatedUser);
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { name, email },
+        { new: true, runValidators: true },
+      );
+      if (!updatedUser) {
+        next(new Error404('Пользователь с указанным _id не найден'));
+      } else {
+        res.status(200).send(updatedUser);
+      }
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new Error409('Переданы некорректные данные при обновлении профиля'));
+      next(new Error400('Переданы некорректные данные при обновлении профиля'));
     } else {
       next(new Error500('Ошибка сервера'));
     }
