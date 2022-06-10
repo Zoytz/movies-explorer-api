@@ -6,7 +6,8 @@ const Error403 = require('../utils/errors/Error403');
 
 exports.getMovies = async (req, res, next) => {
   try {
-    const movies = await Movie.find({});
+    const owner = req.user._id;
+    const movies = await Movie.find({ owner });
     return res.status(200).send(movies);
   } catch (err) {
     return next(new Error500('Ошибка сервера'));
